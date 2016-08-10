@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import unicodedata
+
 from django.db import models
 from django.apps import apps
 from django.conf import settings
@@ -62,14 +64,15 @@ def _get_all_media(exclude=[]):
 
     for root, dirs, files in os.walk(settings.MEDIA_ROOT):
         for name in files:
+            nname = unicodedata.normalize("NFC", name.decode("utf-8"))
             in_exclude = False
             for e in exclude:
-                if re.match(r'^%s$' % re.escape(e).replace('\\*', '.*'), name):
+                if re.match(r'^%s$' % re.escape(e).replace('\\*', '.*'), nname):
                     in_exclude = True
                     break
 
             if not in_exclude:
-                media.append(os.path.relpath(os.path.join(root, name), settings.MEDIA_ROOT))
+                media.append(os.path.relpath(os.path.join(root, nname), settings.MEDIA_ROOT))
 
     return media
 
